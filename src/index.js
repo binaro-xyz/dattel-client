@@ -19,8 +19,10 @@ const POST = request('POST');
 const PUT = request('PUT');
 const DELETE = request('DELETE');
 
-const catcher = async (e) => console.error((await e.json()) || e.text());
+const catcher = async (e) => console.error(await ((e.json && e.json()) || (e.text && e.text())));
 module.exports = {
     raw: request,
     createSite: async (site_id, domain) => PUT('/site', { site_id, domain }).catch(catcher),
+    deleteSite: async (site_id, delete_token = undefined) =>
+        DELETE(`/site/${site_id}`, { delete_token }).catch(catcher),
 };
