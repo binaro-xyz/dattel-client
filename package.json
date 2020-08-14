@@ -1,0 +1,27 @@
+{
+    "name": "dattel-client",
+    "version": "1.0.0",
+    "description": "The client side of the dattel static site hosting solution.",
+    "main": "index.js",
+    "author": "Benjamin Altpeter <hi@bn.al>",
+    "license": "MIT",
+    "private": false,
+    "devDependencies": {
+        "husky": "^4.2.5",
+        "lint-staged": "^10.2.11",
+        "prettier": "^2.0.5"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "lint-staged"
+        }
+    },
+    "lint-staged": {
+        "*.{js,css,scss,json}": [
+            "prettier --write"
+        ]
+    },
+    "dependencies": {
+        "bent": "^7.3.9"
+    }
+}
