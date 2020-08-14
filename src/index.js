@@ -1,4 +1,13 @@
 const bent = require('bent');
+const glob = require('glob');
+const hasha = require('hasha');
+const { addedDiff, deletedDiff, updatedDiff } = require('deep-object-diff');
+const fs = require('fs');
+const path = require('path');
+
+const debug = (...args) => {
+    if (process.env.DATTEL_DEBUG) console.log(args);
+};
 
 let config;
 try {
@@ -10,19 +19,62 @@ try {
     process.exit(1);
 }
 
-const request = (method) =>
-    bent(method, 'json', [200, 201], config.server_url, {
-        Authorization: `Bearer ${config.auth_token}`,
-    });
+const request = (method) => {
+    return function (...args) {
+        return bent(method, 'json', [200, 201], config.server_url, {
+            Authorization: `Bearer ${config.auth_token}`,
+        })(...args).catch((err) => {
+            console.error('Request failed.', err, [method, ...args]);
+            process.exit(1);
+        });
+    };
+};
 const GET = request('GET');
 const POST = request('POST');
+const PATCH = request('PATCH');
 const PUT = request('PUT');
 const DELETE = request('DELETE');
 
-const catcher = async (e) => console.error(await ((e.json && e.json()) || (e.text && e.text())));
+const createSite = (site_id, domain) => PUT('/site', { site_id, domain });
+const deleteSite = (site_id, delete_token = undefined) => DELETE(`/site/${site_id}`, { delete_token });
+
+const startDeploy = (site_id) => PUT(`/site/${site_id}/deploy`);
+const cancelDeploy = (site_id) => DELETE(`/site/${site_id}/deploy`);
+const uploadDeployFile = (site_id, deploy_id, dest_path, in_path) =>
+    PUT(`/site/${site_id}/deploy/${deploy_id}/file/${dest_path}`, fs.readFileSync(in_path));
+const deleteDeployFile = (site_id, deploy_id, dest_path) =>
+    DELETE(`/site/${site_id}/deploy/${deploy_id}/file/${dest_path}`);
+const deployDirectory = (site_id, deploy_id, remote_file_info, local_dir) => {
+    // TODO: This was just copied from the server. Ideally, they could share this code somehow.
+    const files = glob.sync('**/*', { cwd: local_dir, dot: true, nodir: true }).reduce(
+        (acc, cur) => ({
+            ...acc,
+            [cur]: hasha.fromFileSync(path.join(local_dir, cur), { algorithm: 'md5' }),
+        }),
+        {}
+    );
+
+    const delete_files = Object.keys(deletedDiff(remote_file_info, files)).map((f) =>
+        deleteDeployFile(site_id, deploy_id, f)
+    );
+    const upload_files = [
+        ...Object.keys(addedDiff(remote_file_info, files)),
+        ...Object.keys(updatedDiff(remote_file_info, files)),
+    ].map((f) => uploadDeployFile(site_id, deploy_id, f, path.join(local_dir, f)));
+
+    return Promise.all([...delete_files, ...upload_files]);
+};
+const publishDeploy = (site_id, deploy_id) => POST(`/site/${site_id}/deploy/${deploy_id}/publish`);
+
 module.exports = {
     raw: request,
-    createSite: async (site_id, domain) => PUT('/site', { site_id, domain }).catch(catcher),
-    deleteSite: async (site_id, delete_token = undefined) =>
-        DELETE(`/site/${site_id}`, { delete_token }).catch(catcher),
+
+    createSite,
+    deleteSite,
+    startDeploy,
+    cancelDeploy,
+    uploadDeployFile,
+    deleteDeployFile,
+    deployDirectory,
+    publishDeploy,
 };
