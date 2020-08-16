@@ -2,6 +2,7 @@ const bent = require('bent');
 const glob = require('glob');
 const hasha = require('hasha');
 const { addedDiff, deletedDiff, updatedDiff } = require('deep-object-diff');
+const { parseHeadersFile } = require('./lib/headers');
 const fs = require('fs');
 const path = require('path');
 
@@ -23,8 +24,9 @@ const request = (method) => {
     return function (...args) {
         return bent(method, 'json', [200, 201], config.server_url, {
             Authorization: `Bearer ${config.auth_token}`,
-        })(...args).catch((err) => {
+        })(...args).catch(async (err) => {
             console.error('Request failed.', err, [method, ...args]);
+            if (err.json) console.log(await err.json());
             process.exit(1);
         });
     };
@@ -37,6 +39,8 @@ const DELETE = request('DELETE');
 
 const createSite = (site_id, domain) => PUT('/site', { site_id, domain });
 const deleteSite = (site_id, delete_token = undefined) => DELETE(`/site/${site_id}`, { delete_token });
+const setSiteHeaders = (site_id, header_definition) => PATCH(`/site/${site_id}/headers`, header_definition);
+const setSiteHeadersFromFile = (site_id, headers_file) => setSiteHeaders(site_id, parseHeadersFile(headers_file));
 
 const startDeploy = (site_id) => PUT(`/site/${site_id}/deploy`);
 const cancelDeploy = (site_id) => DELETE(`/site/${site_id}/deploy`);
@@ -71,6 +75,8 @@ module.exports = {
 
     createSite,
     deleteSite,
+    setSiteHeaders,
+    setSiteHeadersFromFile,
     startDeploy,
     cancelDeploy,
     uploadDeployFile,
