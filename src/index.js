@@ -3,6 +3,7 @@ const glob = require('glob');
 const hasha = require('hasha');
 const { addedDiff, deletedDiff, updatedDiff } = require('deep-object-diff');
 const { parseHeadersFile } = require('./lib/headers');
+const { parseRedirectsFile } = require('./lib/redirects');
 const fs = require('fs');
 const path = require('path');
 
@@ -39,8 +40,10 @@ const DELETE = request('DELETE');
 
 const createSite = (site_id, domain) => PUT('/site', { site_id, domain });
 const deleteSite = (site_id, delete_token = undefined) => DELETE(`/site/${site_id}`, { delete_token });
-const setSiteHeaders = (site_id, header_definition) => PATCH(`/site/${site_id}/headers`, header_definition);
-const setSiteHeadersFromFile = (site_id, headers_file) => setSiteHeaders(site_id, parseHeadersFile(headers_file));
+const setSiteHeaders = (site_id, headers = {}, redirects = []) =>
+    PATCH(`/site/${site_id}/headers`, { headers, redirects });
+const setSiteHeadersFromFile = async (site_id, headers_file, redirects_file) =>
+    setSiteHeaders(site_id, parseHeadersFile(headers_file), await parseRedirectsFile(redirects_file));
 
 const startDeploy = (site_id) => PUT(`/site/${site_id}/deploy`);
 const cancelDeploy = (site_id) => DELETE(`/site/${site_id}/deploy`);

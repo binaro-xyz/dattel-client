@@ -25,7 +25,8 @@
         "bent": "^7.3.9",
         "deep-object-diff": "^1.1.0",
         "glob": "^7.1.6",
-        "hasha": "^5.2.0"
+        "hasha": "^5.2.0",
+        "netlify-redirect-parser": "^2.5.0"
     },
     "scripts": {
         "test": "echo 'TODO: No test specified yet.'"
