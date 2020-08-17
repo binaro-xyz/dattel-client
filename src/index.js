@@ -14,13 +14,17 @@ const debug = (...args) => {
 module.exports = ({ server_url, auth_token }) => {
     const request = (method) => {
         return function (...args) {
-            return bent(method, 'json', [200, 201], server_url, {
+            const func = bent(method, 'json', [200, 201], server_url, {
                 Authorization: `Bearer ${auth_token}`,
-            })(...args).catch(async (err) => {
-                console.error('Request failed.', err, [method, ...args]);
-                if (err.json) console.log(await err.json());
-                process.exit(1);
             });
+            if (process.env.DATTEL_DEBUG) {
+                return func(...args).catch(async (err) => {
+                    console.error('Request failed.', err, [method, ...args]);
+                    if (err.json) console.log(await err.json());
+                    process.exit(1);
+                });
+            }
+            return func(...args);
         };
     };
     const GET = request('GET');
