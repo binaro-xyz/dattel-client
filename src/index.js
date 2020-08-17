@@ -38,7 +38,7 @@ const PATCH = request('PATCH');
 const PUT = request('PUT');
 const DELETE = request('DELETE');
 
-const createSite = (site_id, domain) => PUT('/site', { site_id, domain });
+const createSite = (site_id, domains) => PUT('/site', { site_id, domains });
 const deleteSite = (site_id, delete_token = undefined) => DELETE(`/site/${site_id}`, { delete_token });
 const setSiteHeaders = (site_id, headers = {}, redirects = []) =>
     PATCH(`/site/${site_id}/headers`, { headers, redirects });
