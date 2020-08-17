@@ -1,4 +1,5 @@
-const bent = require('bent');
+const rax = require('retry-axios');
+const _axios = require('axios').default;
 const glob = require('glob');
 const hasha = require('hasha');
 const { addedDiff, deletedDiff, updatedDiff } = require('deep-object-diff');
@@ -12,26 +13,35 @@ const debug = (...args) => {
 };
 
 module.exports = ({ server_url, auth_token }) => {
-    const request = (method) => {
-        return function (...args) {
-            const func = bent(method, 'json', [200, 201], server_url, {
-                Authorization: `Bearer ${auth_token}`,
-            });
-            if (process.env.DATTEL_DEBUG) {
-                return func(...args).catch(async (err) => {
-                    console.error('Request failed.', err, [method, ...args]);
-                    if (err.json) console.log(await err.json());
-                    process.exit(1);
-                });
-            }
-            return func(...args);
-        };
+    const ax = _axios.create({
+        baseURL: server_url,
+        timeout: 10000,
+    });
+    ax.defaults.headers.common['Authorization'] = `Bearer ${auth_token}`;
+    ax.defaults.raxConfig = {
+        instance: ax,
+        httpMethodsToRetry: ['GET', 'HEAD', 'OPTIONS', 'DELETE', 'PUT', 'POST', 'PATCH'],
     };
-    const GET = request('GET');
-    const POST = request('POST');
-    const PATCH = request('PATCH');
-    const PUT = request('PUT');
-    const DELETE = request('DELETE');
+    rax.attach(ax);
+
+    // const request = (method) => {
+    //     return function (...args) {
+    //         const func = bent(method, 'json', [200, 201], server_url);
+    //         if (process.env.DATTEL_DEBUG) {
+    //             return func(...args).catch(async (err) => {
+    //                 console.error('Request failed.', err, [method, ...args]);
+    //                 if (err.json) console.log(await err.json());
+    //                 process.exit(1);
+    //             });
+    //         }
+    //         return func(...args);
+    //     };
+    // };
+    const GET = ax.get;
+    const POST = ax.post;
+    const PATCH = ax.patch;
+    const PUT = ax.put;
+    const DELETE = ax.delete;
 
     const createSite = (site_id, domains) => PUT('/site', { site_id, domains });
     const deleteSite = (site_id, delete_token = undefined) => DELETE(`/site/${site_id}`, { delete_token });
@@ -69,7 +79,7 @@ module.exports = ({ server_url, auth_token }) => {
     const publishDeploy = (site_id, deploy_id) => POST(`/site/${site_id}/deploy/${deploy_id}/publish`);
 
     return {
-        raw: request,
+        raw: ax,
 
         createSite,
         deleteSite,
