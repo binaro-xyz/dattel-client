@@ -3,6 +3,7 @@ const _axios = require('axios').default;
 const glob = require('glob');
 const hasha = require('hasha');
 const { addedDiff, deletedDiff, updatedDiff } = require('deep-object-diff');
+const { chunkPromise } = require('chunk-promise');
 const { parseHeadersFile } = require('./lib/headers');
 const { parseRedirectsFile } = require('./lib/redirects');
 const fs = require('fs');
@@ -15,7 +16,6 @@ const debug = (...args) => {
 module.exports = ({ server_url, auth_token }) => {
     const ax = _axios.create({
         baseURL: server_url,
-        timeout: 10000,
     });
     ax.defaults.headers.common['Authorization'] = `Bearer ${auth_token}`;
     ax.defaults.raxConfig = {
@@ -24,19 +24,6 @@ module.exports = ({ server_url, auth_token }) => {
     };
     rax.attach(ax);
 
-    // const request = (method) => {
-    //     return function (...args) {
-    //         const func = bent(method, 'json', [200, 201], server_url);
-    //         if (process.env.DATTEL_DEBUG) {
-    //             return func(...args).catch(async (err) => {
-    //                 console.error('Request failed.', err, [method, ...args]);
-    //                 if (err.json) console.log(await err.json());
-    //                 process.exit(1);
-    //             });
-    //         }
-    //         return func(...args);
-    //     };
-    // };
     const GET = ax.get;
     const POST = ax.post;
     const PATCH = ax.patch;
@@ -66,15 +53,15 @@ module.exports = ({ server_url, auth_token }) => {
             {}
         );
 
-        const delete_files = Object.keys(deletedDiff(remote_file_info, files)).map((f) =>
+        const delete_files = Object.keys(deletedDiff(remote_file_info, files)).map((f) => () =>
             deleteDeployFile(site_id, deploy_id, f)
         );
         const upload_files = [
             ...Object.keys(addedDiff(remote_file_info, files)),
             ...Object.keys(updatedDiff(remote_file_info, files)),
-        ].map((f) => uploadDeployFile(site_id, deploy_id, f, path.join(local_dir, f)));
+        ].map((f) => () => uploadDeployFile(site_id, deploy_id, f, path.join(local_dir, f)));
 
-        return Promise.all([...delete_files, ...upload_files]);
+        return chunkPromise([...delete_files, ...upload_files], { concurrent: 5 });
     };
     const publishDeploy = (site_id, deploy_id) => POST(`/site/${site_id}/deploy/${deploy_id}/publish`);
 
