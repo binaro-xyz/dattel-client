@@ -30,8 +30,9 @@ module.exports = ({ server_url, auth_token }) => {
     const PUT = ax.put;
     const DELETE = ax.delete;
 
-    const createSite = (site_id, domains) => PUT('/site', { site_id, domains });
-    const deleteSite = (site_id, delete_token = undefined) => DELETE(`/site/${site_id}`, { delete_token });
+    const createSite = (site_id, domains, enable_cdn = true, bunny_pricing_type = 0) =>
+        PUT('/site', { site_id, domains, enable_cdn, bunny_pricing_type });
+    const deleteSite = (site_id, delete_token = undefined) => DELETE(`/site/${site_id}`, { data: { delete_token } });
     const setSiteHeaders = (site_id, headers = {}, redirects = []) =>
         PATCH(`/site/${site_id}/headers`, { headers, redirects });
     const setSiteHeadersFromFile = async (site_id, headers_file, redirects_file) =>
