@@ -6,6 +6,7 @@ const { addedDiff, deletedDiff, updatedDiff } = require('deep-object-diff');
 const { chunkPromise } = require('chunk-promise');
 const { parseHeadersFile } = require('./lib/headers');
 const { parseRedirectsFile } = require('./lib/redirects');
+const { base64Encode } = require('./lib/util');
 const fs = require('fs');
 const path = require('path');
 
@@ -41,7 +42,7 @@ module.exports = ({ server_url, auth_token }) => {
     const startDeploy = (site_id) => PUT(`/site/${site_id}/deploy`);
     const cancelDeploy = (site_id) => DELETE(`/site/${site_id}/deploy`);
     const uploadDeployFile = (site_id, deploy_id, dest_path, in_path) =>
-        PUT(`/site/${site_id}/deploy/${deploy_id}/file/${dest_path}`, fs.readFileSync(in_path));
+        PUT(`/site/${site_id}/deploy/${deploy_id}/file/${base64Encode(dest_path)}`, fs.readFileSync(in_path));
     const deleteDeployFile = (site_id, deploy_id, dest_path) =>
         DELETE(`/site/${site_id}/deploy/${deploy_id}/file/${dest_path}`);
     const deployDirectory = (site_id, deploy_id, remote_file_info, local_dir) => {
