@@ -44,7 +44,7 @@ module.exports = ({ server_url, auth_token }) => {
     const uploadDeployFile = (site_id, deploy_id, dest_path, in_path) =>
         PUT(`/site/${site_id}/deploy/${deploy_id}/file/${base64Encode(dest_path)}`, fs.readFileSync(in_path));
     const deleteDeployFile = (site_id, deploy_id, dest_path) =>
-        DELETE(`/site/${site_id}/deploy/${deploy_id}/file/${dest_path}`);
+        DELETE(`/site/${site_id}/deploy/${deploy_id}/file/${base64Encode(dest_path)}`);
     const deployDirectory = (site_id, deploy_id, remote_file_info, local_dir) => {
         // TODO: This was just copied from the server. Ideally, they could share this code somehow.
         const files = glob.sync('**/*', { cwd: local_dir, dot: true, nodir: true }).reduce(
