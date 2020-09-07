@@ -36,8 +36,12 @@ module.exports = ({ server_url, auth_token }) => {
     const deleteSite = (site_id, delete_token = undefined) => DELETE(`/site/${site_id}`, { data: { delete_token } });
     const setSiteHeaders = (site_id, headers = {}, redirects = []) =>
         PATCH(`/site/${site_id}/headers`, { headers, redirects });
-    const setSiteHeadersFromFile = async (site_id, headers_file, redirects_file) =>
-        setSiteHeaders(site_id, parseHeadersFile(headers_file), await parseRedirectsFile(redirects_file));
+    const setSiteHeadersFromFile = async (site_id, headers_file = null, redirects_file = null) =>
+        setSiteHeaders(
+            site_id,
+            headers_file ? parseHeadersFile(headers_file) : {},
+            redirects_file ? await parseRedirectsFile(redirects_file) : []
+        );
 
     const startDeploy = (site_id) => PUT(`/site/${site_id}/deploy`);
     const cancelDeploy = (site_id) => DELETE(`/site/${site_id}/deploy`);
