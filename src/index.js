@@ -49,14 +49,14 @@ module.exports = ({ server_url, auth_token }) => {
         PUT(`/site/${site_id}/deploy/${deploy_id}/file/${base64Encode(dest_path)}`, fs.readFileSync(in_path));
     const deleteDeployFile = (site_id, deploy_id, dest_path) =>
         DELETE(`/site/${site_id}/deploy/${deploy_id}/file/${base64Encode(dest_path)}`);
-    const deployDirectory = (site_id, deploy_id, remote_file_info, local_dir) => {
+    const deployDirectory = async (site_id, deploy_id, remote_file_info, local_dir) => {
         // TODO: This was just copied from the server. Ideally, they could share this code somehow.
-        const files = glob.sync('**/*', { cwd: local_dir, dot: true, nodir: true }).reduce(
-            (acc, cur) => ({
-                ...acc,
-                [cur]: hasha.fromFileSync(path.join(local_dir, cur), { algorithm: 'md5' }),
-            }),
-            {}
+        const paths = glob.sync('**/*', { cwd: local_dir, dot: true, nodir: true });
+        const files = {};
+        await Promise.all(
+            paths.map((p) => {
+                files[p] = hasha.fromFileSync(path.join(local_dir, p), { algorithm: 'md5' });
+            })
         );
 
         const delete_files = Object.keys(deletedDiff(remote_file_info, files)).map((f) => () =>
