@@ -1,5 +1,5 @@
 /*
-The code in this file was taken from the netlify/cli project on GitHub:
+The code in this file was taken from the netlify/cli project on GitHub (and then typehinted):
 
 https://github.com/netlify/cli/blob/23d290aa67a5eb64ed5909dfa3f222a08dd51e45/src/utils/headers.js
 
@@ -33,51 +33,15 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-const fs = require('fs');
+import fs from 'fs';
+
+export type HeaderRules = Record<string, Record<string, string[]>>;
 
 const TOKEN_COMMENT = '#';
 const TOKEN_PATH = '/';
 
-function matchPaths(rulePath, targetPath) {
-    const rulePathParts = rulePath.split('/').filter(Boolean);
-    const targetPathParts = targetPath.split('/').filter(Boolean);
-
-    if (rulePathParts.length < 1 && targetPathParts.length < 1) {
-        return true;
-    }
-
-    for (let i = 0; i < rulePathParts.length; i++) {
-        if (i >= targetPathParts.length) return false;
-
-        const rulePart = rulePathParts[i];
-        const target = targetPathParts[i];
-
-        if (rulePart === '*') return true;
-
-        if (rulePart.startsWith(':')) {
-            if (i === rulePathParts.length - 1) {
-                return i === targetPathParts.length - 1;
-            }
-            if (i === targetPathParts.length - 1) {
-                return false;
-            }
-        } else {
-            return rulePart === target;
-        }
-    }
-
-    return false;
-}
-
-function objectForPath(rules, pathname) {
-    return Object.entries(rules).reduce(
-        (prev, [rulePath, pathHeaders]) => Object.assign({}, prev, matchPaths(rulePath, pathname) && pathHeaders),
-        {}
-    );
-}
-
-function parseHeadersFile(filePath) {
-    const rules = {};
+export function parseHeadersFile(filePath: string): HeaderRules {
+    const rules: HeaderRules = {};
     if (!fs.existsSync(filePath)) return rules;
     if (fs.statSync(filePath).isDirectory()) {
         console.warn('expected _headers file but found a directory at:', filePath);
@@ -127,8 +91,3 @@ function parseHeadersFile(filePath) {
 
     return rules;
 }
-
-module.exports = {
-    objectForPath,
-    parseHeadersFile,
-};

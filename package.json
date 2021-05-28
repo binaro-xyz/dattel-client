@@ -2,14 +2,24 @@
     "name": "dattel-client",
     "version": "0.7.2",
     "description": "The client side of the dattel static site hosting solution.",
-    "main": "src/index.js",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "author": "Benjamin Altpeter <hi@bn.al>",
     "license": "MIT",
     "private": false,
     "devDependencies": {
+        "@types/glob": "^7.1.3",
+        "@types/node": "^15.6.1",
+        "@typescript-eslint/eslint-plugin": "^4.25.0",
+        "@typescript-eslint/parser": "^4.25.0",
+        "eslint": "^7.27.0",
+        "eslint-config-prettier": "^8.3.0",
+        "eslint-plugin-eslint-comments": "^3.2.0",
+        "eslint-plugin-import": "^2.23.3",
         "husky": "^4.2.5",
         "lint-staged": "^10.2.11",
-        "prettier": "^2.0.5"
+        "prettier": "^2.0.5",
+        "typescript": "^4.3.2"
     },
     "husky": {
         "hooks": {
@@ -17,8 +27,11 @@
         }
     },
     "lint-staged": {
-        "*.{js,css,scss,json}": [
+        "*.{ts,js,css,scss,json}": [
             "prettier --write"
+        ],
+        "*.{ts,js}": [
+            "eslint --fix"
         ]
     },
     "dependencies": {
@@ -31,6 +44,11 @@
         "retry-axios": "^2.2.1"
     },
     "scripts": {
+        "build": "tsc",
+        "watch": "tsc -w",
         "test": "echo 'TODO: No test specified yet.'"
-    }
+    },
+    "files": [
+        "/dist"
+    ]
 }
