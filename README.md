@@ -50,6 +50,8 @@ main();
 
 `dattel-client` can also be used as a CLI. See below for the commands.
 
+![Short demonstration of using dattel CLI](https://cdn.baltpeter.io/img/dattel-cli-demo.gif)
+
 To use the dattel CLI, you need to provide the server URL and auth token. You can either do this dynamically at runtime (dattel CLI will prompt you if the values are missing) or conveniently through environment variables:
 
 ```sh
