@@ -1,4 +1,5 @@
 config.json
+oclif.manifest.json
 tmp/
 *.tmp
 tmp.*

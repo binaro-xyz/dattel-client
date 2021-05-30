@@ -1,0 +1,49 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://github.com/binaro-xyz/dattel-server/blob/master/config-schema.json",
+    "title": "Dattel config",
+    "description": "Describes a dattel-managed site for use with the dattel CLI.\n\nSee: https://github.com/binaro-xyz/dattel-client#CLI",
+    "type": "object",
+    "properties": {
+        "site_id": {
+            "title": "Site ID",
+            "description": "The site ID to deploy to (required, and filled automatically when creating a new site)",
+            "type": "string",
+            "examples": ["my-site"],
+            "pattern": "^[a-z0-9\\-]+$"
+        },
+        "publish_dir": {
+            "title": "Publish directory",
+            "description": "The folder to deploy from (relative to the dattel config's directory)",
+            "type": "string",
+            "default": "public",
+            "examples": ["public-de", "../public", "/home/user/my-site/public"]
+        },
+        "headers_file": {
+            "title": "Headers file",
+            "description": "The file to read headers from or `false` to not set any headers (relative to the dattel config's directory, uses [Netlify's syntax](https://docs.netlify.com/routing/headers/#syntax-for-the-headers-file))",
+            "type": ["string", "boolean"],
+            "not": { "enum": [true] },
+            "default": "_headers",
+            "examples": ["_headers-prod", "../_headers", "/home/user/my-site/_headers"]
+        },
+        "redirects_file": {
+            "title": "Redirects file",
+            "description": "The file to read redirects from or `false` to not set any redirects (relative to the dattel config's directory, uses [Netlify's syntax](https://docs.netlify.com/routing/redirects/#syntax-for-the-redirects-file) with some [restrictions](/src/lib/redirects.ts))",
+            "type": ["string", "boolean"],
+            "not": { "enum": [true] },
+            "default": "_redirects",
+            "examples": ["_redirects-prod", "../_redirects", "/home/user/my-site/_redirects"]
+        }
+    },
+    "required": ["site_id"],
+    "additionalProperties": {
+        "properties": {
+            "$schema": {
+                "type": "string",
+                "format": "uri",
+                "$comment": "Used by VS Code: https://code.visualstudio.com/Docs/languages/json#_json-schemas-and-settings"
+            }
+        }
+    }
+}
