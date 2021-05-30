@@ -1,6 +1,6 @@
 {
     "name": "dattel-client",
-    "version": "0.7.2",
+    "version": "0.8.0",
     "description": "The client side of the dattel static site hosting solution.",
     "author": "Benjamin Altpeter <hi@bn.al>",
     "main": "dist/index.js",
