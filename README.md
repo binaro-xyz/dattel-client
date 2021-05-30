@@ -50,6 +50,13 @@ main();
 
 `dattel-client` can also be used as a CLI. See below for the commands.
 
+To use the dattel CLI, you need to provide the server URL and auth token. You can either do this dynamically at runtime (dattel CLI will prompt you if the values are missing) or conveniently through environment variables:
+
+```sh
+export DATTEL_SERVER="https://dattel-05.acme.tld:3000"
+export DATTEL_TOKEN="NkZB32dKm7HLRd4mIHIylYHuzMGZLRa1"
+```
+
 ## Config
 
 When you create a new site using `dattel site:create`, a dattel config file called `dattel.json` is generated. Using this file, you can set the options that `dattel deploy` uses to deploy your site.
