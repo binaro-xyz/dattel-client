@@ -2,6 +2,8 @@
 
 **TODO: This is still very much a work in progress. Neither the code nor this README is done yet. Expect breaking changes.**
 
+Take a look at the [CircleCI sample config](/doc/sample-circleci-config.yml) to see how to deploy to a dattel-managed site from CI.
+
 ## Example
 
 A small example on how to use the client:

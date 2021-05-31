@@ -1,0 +1,23 @@
+version: 2.1
+
+jobs:
+  build_and_deploy:
+    docker:
+      - image: cimg/node:14.17
+    steps:
+      - checkout
+      - run:
+          command: |
+            ./build.sh
+            sudo npm i -g dattel-client
+            dattel deploy
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build_and_deploy:
+          filters:
+            branches:
+              only:
+                - main
