@@ -71,7 +71,8 @@ export default class CreateSite extends Command {
                         'dattel.json',
                         JSON.stringify(
                             {
-                                $schema: 'https://github.com/binaro-xyz/dattel-server/blob/master/config-schema.json',
+                                $schema:
+                                    'https://raw.githubusercontent.com/binaro-xyz/dattel-client/master/config-schema.json',
                                 site_id: args.site_id,
                             },
                             null,
