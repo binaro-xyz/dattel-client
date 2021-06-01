@@ -20,6 +20,8 @@ type EmptyResponse = AxiosReturn<EmptyServerReturn>;
 export default ({ server_url, auth_token }: { server_url: string; auth_token: string }) => {
     const ax = _axios.create({
         baseURL: server_url,
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
     });
     ax.defaults.headers.common['Authorization'] = `Bearer ${auth_token}`;
     ax.defaults.raxConfig = {
@@ -76,8 +78,8 @@ export default ({ server_url, auth_token }: { server_url: string; auth_token: st
             })
         );
 
-        const delete_files = Object.keys(deletedDiff(remote_file_info, files)).map((f) => () =>
-            deleteDeployFile(site_id, deploy_id, f)
+        const delete_files = Object.keys(deletedDiff(remote_file_info, files)).map(
+            (f) => () => deleteDeployFile(site_id, deploy_id, f)
         );
         const upload_files = [
             ...Object.keys(addedDiff(remote_file_info, files)),
